@@ -168,7 +168,8 @@
 (define (mem message proc)
   (define (original-procedure proc)
     (lookup proc memoized-procedures))
-  ;;oppgave a
+
+  ;;oppgave 1a
   (cond ((equal? message 'memoize)
          (let ((cache (make-table)))
            ;;lager prosedyre med 0+ argumenter
@@ -185,7 +186,7 @@
              ;;husker hvilken prosedyre den tilhører
              (insert! memoized-proc proc memoized-procedures)
              memoized-proc)))
-        ;;oppgave b
+        ;;oppgave 1b
         ((equal? message 'unmemoize)
          (let ((original (original-procedure proc)))
            (if original
@@ -195,22 +196,14 @@
          ('Ukjent mem innhentet))))
 
 
-
-(set! test-proc (mem 'memoize test-proc))
-(test-proc)
-(test-proc)
-(test-proc 40 41 42 43 44)
-(test-proc 40 41 42 43 44)
-(test-proc 42 43 44)
-
-
 ;; oppgave 1c
 ;; set! overskriver den globale bindingen fib med den memoiserte prosedyren.
-;; i den nye måten å bruke mem på, slår rekursjonen i fib opp navnet fib i det globale miljøet hver gang den kaller seg selv.
+;; i den nye måten å bruke mem på
+;; slår rekursjonen i fib opp navnet fib
+;; i det globale miljøet hver gang den kaller seg selv.
 
 
 ;; oppgave 2a
-
 (define (list-to-stream lst)
   (if (null? lst)
       the-empty-stream
@@ -224,18 +217,53 @@
              #f
              (car arguments))))
 
-   (cond
-     ((stream-null? stream) '())
-     ((and limit (zero? limit)) '())
-     (else
-      (cons (stream-car stream)
-            (stream-to-list (stream-cdr stream)
-                            (if limit (- limit 1) #f)))))))
+    (cond
+      ((stream-null? stream) '())
+      ((and limit (zero? limit)) '())
+      (else
+       (cons (stream-car stream)
+             (stream-to-list (stream-cdr stream)
+                             (if limit (- limit 1) #f)))))))
+
+;; oppgave 2b
+(define (stream-take n stream) ;; returnerer en ny strøm med de n første elementene
+  ;;(let ((current) n))
+  (if (or (zero? n) (stream-null? stream))
+      the-empty-stream
+      (cons-stream
+       (stream-car stream)
+       (stream-take (- n 1)
+                    (stream-cdr stream)))))
 
 
+;; oppgave 2c
+;; uhhh
+
+
+;; oppgave 2d
+(define (remove-duplicates stream)
+  (if (stream-null? stream)
+      the-empty-stream
+      (cons-stream (stream-car stream) 
+                   (remove-duplicates
+                    (stream-filter
+                     (lambda (x)
+                       (not (= x (stream-car stream))))
+                     (stream-cdr stream))))))
+
+;; tester 1a og 1b:
+(set! test-proc (mem 'memoize test-proc))
+(test-proc)
+(test-proc)
+(test-proc 40 41 42 43 44)
+(test-proc 40 41 42 43 44)
+(test-proc 42 43 44)
+
+;; tester 2a:
 (list-to-stream '(1 2 3 4 5))
 (stream-to-list (stream-interval 10 20))
   
 
-
-
+;; tester 2b:
+(define foo (stream-take 10 nats))
+foo
